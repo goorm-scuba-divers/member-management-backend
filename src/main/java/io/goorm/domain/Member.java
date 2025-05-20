@@ -7,7 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDateTime;
 
 @Entity
-public class Member {
+public class Member extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,17 +24,6 @@ public class Member {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberRole role;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column
-    private LocalDateTime modifiedAt;
-
-    @Column
-    private LocalDateTime deletedAt;
 
     protected Member() {}
 
@@ -57,20 +46,16 @@ public class Member {
         return id;
     }
 
+    public MemberRole getRole() {
+        return role;
+    }
+
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
 
     public void changePassword(String password) {
         this.password = password;
-    }
-
-    public void deleteMember() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
     }
 
     public boolean isDeleted() {

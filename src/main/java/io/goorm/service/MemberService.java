@@ -1,9 +1,12 @@
 package io.goorm.service;
 
+import io.goorm.config.dto.PrincipalDetails;
 import io.goorm.dao.MemberRepository;
 import io.goorm.domain.Member;
 import io.goorm.dto.request.MemberSaveRequest;
 import io.goorm.dto.response.MemberResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -37,15 +40,26 @@ public class MemberService {
     // 전체 회원 조회
     public List<MemberResponse> findAll() {
         List<Member> members = memberRepository.findAll();
-       return members.stream().map(MemberResponse::from).toList();
+        return members.stream().map(MemberResponse::from).toList();
 
 //        List<MemberResponse> responses = new ArrayList<>();
 //        for (Member member : members) {
-//            MemberResponse memberResponse =  MemberResponse.of(member);
+//            MemberResponse memberResponse = MemberResponse.of(member);
 //            responses.add(memberResponse);
 //        }
 //
 //        return responses;
+    }
+
+    public Long getCurrentMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof PrincipalDetails) {
+            return Long.parseLong(((PrincipalDetails) principal).getUsername());
+        }
+
+        throw new IllegalStateException("member unauthorized");
     }
 
     // 내 정보 수정
