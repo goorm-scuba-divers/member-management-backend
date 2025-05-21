@@ -1,40 +1,50 @@
-package io.goorm.service;
+package io.goorm.member.service;
 
 import io.goorm.config.dto.PrincipalDetails;
-import io.goorm.dao.MemberRepository;
-import io.goorm.domain.Member;
-import io.goorm.dto.request.MemberSaveRequest;
-import io.goorm.dto.response.MemberResponse;
+import io.goorm.member.dao.MemberRepository;
+import io.goorm.member.domain.Member;
+import io.goorm.member.dto.request.MemberSaveRequest;
+import io.goorm.member.dto.response.MemberFindMeResponse;
+import io.goorm.member.dto.response.MemberResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // 회원가입
+    @Transactional
     public void save(MemberSaveRequest request) {
-        memberRepository.save(new Member(request.username(), request.nickname(), request.password()));
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        memberRepository.save(
+                new Member(request.username(), request.nickname(), encodedPassword)
+        );
     }
 
     // 내 프로필 조회
-    public void findMember() {
-        Optional<Member> member = memberRepository.findById(1L);
+    public MemberFindMeResponse findMember() {
+        return MemberFindMeResponse.from(getCurrentMember());
+    }
 
-        if (member.isEmpty()) {
-            throw new IllegalStateException("member not found");
-        }
-
-        Member member1 = member.get();
+    private Member getCurrentMember() {
+        return memberRepository.findById(getCurrentMemberId()).orElseThrow(
+                () -> new IllegalStateException("member not found")
+        );
     }
 
     // 전체 회원 조회

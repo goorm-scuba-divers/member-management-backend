@@ -1,10 +1,6 @@
-package io.goorm.domain;
+package io.goorm.member.domain;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import java.time.LocalDateTime;
 
 @Entity
 public class Member extends BaseTimeEntity {
@@ -48,6 +44,10 @@ public class Member extends BaseTimeEntity {
 
     public MemberRole getRole() {
         return role;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void changeNickname(String nickname) {

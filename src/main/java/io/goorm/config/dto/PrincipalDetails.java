@@ -1,6 +1,6 @@
 package io.goorm.config.dto;
 
-import io.goorm.domain.MemberRole;
+import io.goorm.member.domain.MemberRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

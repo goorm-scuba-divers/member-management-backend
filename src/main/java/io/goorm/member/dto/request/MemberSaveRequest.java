@@ -1,7 +1,9 @@
-package io.goorm.dto.request;
+package io.goorm.member.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record MemberSaveRequest(
         @NotNull(message = "username null이면 안 됨")
@@ -12,7 +14,9 @@ public record MemberSaveRequest(
         @Schema(description = "닉네임", example = "scuba")
         String nickname,
 
-        @NotNull
-        @Schema(description = "비밀번호", example = "1234")
-        String password) {
+        @NotBlank
+        @Size(min = 8, max = 20)
+        @Schema(description = "비밀번호", example = "12345678")
+        String password
+) {
 }

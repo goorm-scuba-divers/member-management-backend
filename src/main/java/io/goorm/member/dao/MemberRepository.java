@@ -1,6 +1,6 @@
-package io.goorm.dao;
+package io.goorm.member.dao;
 
-import io.goorm.domain.Member;
+import io.goorm.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {

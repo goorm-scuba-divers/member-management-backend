@@ -1,4 +1,4 @@
-package io.goorm.domain;
+package io.goorm.member.domain;
 
 public enum MemberRole {
     USER("ROLE_USER"),
