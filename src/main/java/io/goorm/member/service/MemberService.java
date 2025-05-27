@@ -1,50 +1,35 @@
 package io.goorm.member.service;
 
 import io.goorm.config.dto.PrincipalDetails;
+import io.goorm.config.exception.CustomException;
+import io.goorm.config.exception.ErrorCode;
 import io.goorm.member.dao.MemberRepository;
 import io.goorm.member.domain.Member;
-import io.goorm.member.dto.request.MemberSaveRequest;
+import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public MemberService(PasswordEncoder passwordEncoder, MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    // 회원가입
-    @Transactional
-    public void save(MemberSaveRequest request) {
-        String encodedPassword = passwordEncoder.encode(request.password());
-
-        memberRepository.save(
-                new Member(request.username(), request.nickname(), encodedPassword)
-        );
-    }
-
     // 내 프로필 조회
-    public MemberFindMeResponse findMember() {
-        return MemberFindMeResponse.from(getCurrentMember());
-    }
-
-    private Member getCurrentMember() {
-        return memberRepository.findById(getCurrentMemberId()).orElseThrow(
-                () -> new IllegalStateException("member not found")
-        );
+    public MemberFindMeResponse findMember(PrincipalDetails userDetails) {
+        return MemberFindMeResponse.from(getCurrentMember(userDetails));
     }
 
     // 전체 회원 조회
@@ -52,29 +37,58 @@ public class MemberService {
         List<Member> members = memberRepository.findAll();
         return members.stream().map(MemberResponse::from).toList();
 
-//        List<MemberResponse> responses = new ArrayList<>();
-//        for (Member member : members) {
-//            MemberResponse memberResponse = MemberResponse.of(member);
-//            responses.add(memberResponse);
-//        }
-//
-//        return responses;
+//        Page<Member>
+    }
+
+    // 내 정보 수정
+    public void updateMember(PrincipalDetails userDetails, MemberUpdateRequest request) {
+        Member currentMember = getCurrentMember(userDetails);
+
+        if (!request.nickname().equals(currentMember.getNickname())) {
+            currentMember.updateNickname(request.nickname());
+        }
+
+        if (request.currentPassword() != null) {
+            boolean matches = passwordEncoder.matches(request.currentPassword(), currentMember.getPassword());
+            boolean isSameAsNewPassword = passwordEncoder.matches(request.newPassword(), currentMember.getPassword());
+
+            if (matches && isSameAsNewPassword) {
+                throw new CustomException(ErrorCode.MEMBER_PASSWORD_SAME_AS_PREVIOUS);
+            }
+
+            if (matches) {
+                currentMember.updatePassword(passwordEncoder.encode(request.newPassword()));
+            } else {
+                throw new CustomException(ErrorCode.MEMBER_PASSWORD_INVALID);
+            }
+
+        }
+    }
+
+    // 탈퇴
+    public void deleteMember(PrincipalDetails userDetails) {
+        Member member = getCurrentMember(userDetails);
+
+        member.deleteMember();
+    }
+
+    private Member getCurrentMember(PrincipalDetails userDetails) {
+        Long memberId = userDetails == null ? getCurrentMemberId() : Long.parseLong(userDetails.getUsername());
+
+        return memberRepository.findById(memberId).orElseThrow(
+                () -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED)
+        );
     }
 
     public Long getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         Object principal = authentication.getPrincipal();
+
         if (principal instanceof PrincipalDetails) {
             return Long.parseLong(((PrincipalDetails) principal).getUsername());
         }
 
-        throw new IllegalStateException("member unauthorized");
+        throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
     }
-
-    // 내 정보 수정
-    public void changeMember() {}
-
-    // 탈퇴
-    public void deleteMember() {}
 }

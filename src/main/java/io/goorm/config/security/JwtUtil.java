@@ -1,11 +1,10 @@
 package io.goorm.config.security;
 
 import io.goorm.config.dto.TokenDto;
+import io.goorm.config.exception.CustomException;
+import io.goorm.config.exception.ErrorCode;
 import io.goorm.member.domain.MemberRole;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,9 +15,11 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secretKey}")
-    private String secretKey;
+    private final String secretKey;
 
+    public JwtUtil(@Value("${jwt.secretKey}") String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     public String generateAccessToken(Long memberId, MemberRole memberRole) {
         Date issuedAt = new Date();
@@ -34,7 +35,18 @@ public class JwtUtil {
         return generateToken(memberId, memberRole, issuedAt, expiredAt);
     }
 
-    public String generateToken(Long memberId, MemberRole memberRole, Date issuedAt, Date expiredAt) {
+    public Date getExpiredAtByToken(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(getEncodedKey()).build().parseClaimsJws(token);
+            return claimsJws.getBody().getExpiration();
+        } catch (ExpiredJwtException e) {
+            throw e;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String generateToken(Long memberId, MemberRole memberRole, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setSubject(memberId.toString())
                 .claim("role", memberRole.name())
@@ -55,11 +67,9 @@ public class JwtUtil {
             MemberRole role = MemberRole.valueOf(claimsJws.getBody().get("role", String.class));
             return new TokenDto(memberId, role);
         } catch (ExpiredJwtException e) {
-            throw e;
-        } catch (Exception e) {
+            throw new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
-
     }
-
 }
