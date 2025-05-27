@@ -28,9 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // JWT 토큰을 요청 헤더에서 가져오기
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        System.out.println("token = " + token);
-
         // JWT 토큰 검증 및 사용자 정보 설정
         if (hasBearerToken(token)) {
             TokenDto tokenDto = jwtUtil.parseToken(getToken(token));
