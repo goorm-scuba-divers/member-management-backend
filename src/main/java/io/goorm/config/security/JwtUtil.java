@@ -35,7 +35,18 @@ public class JwtUtil {
         return generateToken(memberId, memberRole, issuedAt, expiredAt);
     }
 
-    public String generateToken(Long memberId, MemberRole memberRole, Date issuedAt, Date expiredAt) {
+    public Date getExpiredAtByToken(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(getEncodedKey()).build().parseClaimsJws(token);
+            return claimsJws.getBody().getExpiration();
+        } catch (ExpiredJwtException e) {
+            throw e;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String generateToken(Long memberId, MemberRole memberRole, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setSubject(memberId.toString())
                 .claim("role", memberRole.name())
@@ -60,7 +71,5 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
-
     }
-
 }
