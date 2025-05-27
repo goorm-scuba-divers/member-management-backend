@@ -1,5 +1,6 @@
 package io.goorm.member.domain;
 
+import io.goorm.auth.domain.RefreshToken;
 import jakarta.persistence.*;
 
 @Entity
@@ -50,11 +51,11 @@ public class Member extends BaseTimeEntity {
         return password;
     }
 
-    public void changeNickname(String nickname) {
+    public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    public void changePassword(String password) {
+    public void updatePassword(String password) {
         this.password = password;
     }
 
