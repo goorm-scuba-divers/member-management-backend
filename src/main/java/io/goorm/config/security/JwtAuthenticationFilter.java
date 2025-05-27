@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (hasBearerToken(token)) {
             TokenDto tokenDto = jwtUtil.parseToken(getToken(token));
 
-//            SecurityContextHolder.getContext().getAuthentication() == null
             if (tokenDto != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = new PrincipalDetails(tokenDto.memberId(), tokenDto.memberRole());
                 Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities());
