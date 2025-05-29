@@ -9,30 +9,29 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.print.Pageable;
-import java.util.List;
 
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
 @Tag(name = "회원 API", description = "회원 관련 API")
 public class MemberController {
-    private final MemberService memberService;
 
+    private final MemberService memberService;
 
     // 리스트 조회
     @GetMapping()
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
-    public List<MemberResponse> findAll(
-            @PageableDefault(size = 10, direction = Sort.Direction.DESC, sort = "createdAt", page = 0) Pageable pageable,
+    public Page<MemberResponse> findAll(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String nickname
             ) {
-        return memberService.findAll();
+        return memberService.findAll(pageable, nickname);
     }
 
     // 내 프로필 조회

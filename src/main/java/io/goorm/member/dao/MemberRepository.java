@@ -8,10 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
-//    Member findByUsername(String username);
-//    Page<Member> findByUsername(String username, Pageable pageable)
+    Page<Member> findAllByDeletedAtIsNull(Pageable pageable);
 
     @Query("SELECT m FROM Member m WHERE m.username = :username AND m.deletedAt IS NULL")
     Optional<Member> findByMember(String username);

@@ -11,6 +11,8 @@ import io.goorm.member.dto.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,11 +35,20 @@ public class MemberService {
     }
 
     // 전체 회원 조회
-    public List<MemberResponse> findAll() {
-        List<Member> members = memberRepository.findAll();
-        return members.stream().map(MemberResponse::from).toList();
+    public Page<MemberResponse> findAll(Pageable pageable, String nickname) {
+        List<String> allowedSortProperties = List.of("createdAt", "modifiedAt", "nickname");
 
-//        Page<Member>
+        Sort sort = pageable.getSort();
+
+        for (Sort.Order order : sort) {
+            String property = order.getProperty();
+            if (!allowedSortProperties.contains(property)) {
+                throw new CustomException(ErrorCode.MEMBER_SORT_INVALID);
+            }
+        }
+
+        return memberRepository.findAllByPageableAndFilter(pageable, nickname)
+                .map(MemberResponse::from);
     }
 
     // 내 정보 수정
@@ -61,7 +72,6 @@ public class MemberService {
             } else {
                 throw new CustomException(ErrorCode.MEMBER_PASSWORD_INVALID);
             }
-
         }
     }
 
