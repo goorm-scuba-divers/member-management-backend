@@ -16,6 +16,7 @@ public enum ErrorCode {
     // 멤버
     MEMBER_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 회원입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+    MEMBER_SORT_INVALID(HttpStatus.BAD_REQUEST, "정렬 기준이 잘못되었습니다."),
     MEMBER_PASSWORD_SAME_AS_PREVIOUS(HttpStatus.BAD_REQUEST, "이전 비밀번호와 같습니다."),
     MEMBER_PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "비밀번호가 유효하지 않습니다."),
     ;
