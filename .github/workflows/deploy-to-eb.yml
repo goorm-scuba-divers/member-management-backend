@@ -20,19 +20,36 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Build JAR file
-      run: |
-        ./gradlew clean build
-        mv build/libs/*.jar app.jar
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21' # 또는 17 등 사용 중인 JDK 버전에 맞게
 
-    - name: Deploy to Elastic Beanstalk
+    - name: Build Spring Boot JAR
+      run: ./gradlew bootJar
+
+    - name: Rename JAR to app.jar
       run: |
-        zip -r app.zip app.jar
+        JAR_NAME=$(ls build/libs/*.jar | grep -v 'plain' | head -n 1)
+        mv "$JAR_NAME" app.jar
+
+    - name: Zip the JAR
+      run: zip -r app.zip app.jar
+
+    - name: Upload to S3
+      run: |
+        aws s3 cp app.zip s3://elasticbeanstalk-${{ secrets.AWS_REGION }}-elasticbeanstalk-ap-northeast-2-341354504663/app.zip
+
+    - name: Create new EB app version
+      run: |
         aws elasticbeanstalk create-application-version \
           --application-name ${{ secrets.EB_APP_NAME }} \
           --version-label ${{ github.sha }} \
           --source-bundle S3Bucket="elasticbeanstalk-${{ secrets.AWS_REGION }}-your-bucket",S3Key="app.zip"
-        
+
+    - name: Update EB environment
+      run: |
         aws elasticbeanstalk update-environment \
           --environment-name ${{ secrets.EB_ENV_NAME }} \
           --version-label ${{ github.sha }}
