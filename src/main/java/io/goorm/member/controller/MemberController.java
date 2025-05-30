@@ -29,9 +29,9 @@ public class MemberController {
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
     public Page<MemberResponse> findAll(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String nickname
+            @RequestParam(required = false) String username
             ) {
-        return memberService.findAll(pageable, nickname);
+        return memberService.findAll(pageable, username);
     }
 
     // 내 프로필 조회

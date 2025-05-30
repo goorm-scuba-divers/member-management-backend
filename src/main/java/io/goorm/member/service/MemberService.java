@@ -35,8 +35,8 @@ public class MemberService {
     }
 
     // 전체 회원 조회
-    public Page<MemberResponse> findAll(Pageable pageable, String nickname) {
-        List<String> allowedSortProperties = List.of("createdAt", "modifiedAt", "nickname");
+    public Page<MemberResponse> findAll(Pageable pageable, String username) {
+        List<String> allowedSortProperties = List.of("createdAt", "modifiedAt", "username");
 
         Sort sort = pageable.getSort();
 
@@ -47,7 +47,7 @@ public class MemberService {
             }
         }
 
-        return memberRepository.findAllByPageableAndFilter(pageable, nickname)
+        return memberRepository.findAllByPageableAndFilter(pageable, username)
                 .map(MemberResponse::from);
     }
 

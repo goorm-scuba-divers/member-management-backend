@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
-    Page<Member> findAllByDeletedAtIsNull(Pageable pageable);
-
     @Query("SELECT m FROM Member m WHERE m.username = :username AND m.deletedAt IS NULL")
     Optional<Member> findByMember(String username);
 

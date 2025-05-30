@@ -25,13 +25,13 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Member> findAllByPageableAndFilter(Pageable pageable, String nickname) {
+    public Page<Member> findAllByPageableAndFilter(Pageable pageable, String username) {
 
        JPAQuery<Member> query = queryFactory
                 .select(member)
                 .from(member)
                 .where(
-                        nicknameContains(nickname),
+                        usernameContains(username),
                         member.deletedAt.isNull()
                 )
                .offset(pageable.getOffset())
@@ -39,7 +39,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
        PathBuilder<?> path = new PathBuilder<>(member.getType(), member.getMetadata().getName());
 
-        // ✅ 정렬 처리
         for (Sort.Order order : pageable.getSort()) {
             query.orderBy(
                     new OrderSpecifier<>(
@@ -58,13 +57,12 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
-
     }
 
-    private BooleanExpression nicknameContains(String nickname) {
-        if (nickname == null || nickname.isEmpty()) {
+    private BooleanExpression usernameContains(String username) {
+        if (username == null || username.isEmpty()) {
             return null; // No filter applied
         }
-        return member.nickname.contains(nickname);
+        return member.username.contains(username);
     }
 }
