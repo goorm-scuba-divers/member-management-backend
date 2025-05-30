@@ -1,6 +1,7 @@
 package io.goorm.member.controller;
 
 import io.goorm.config.dto.PrincipalDetails;
+import io.goorm.member.domain.MemberRole;
 import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
@@ -29,9 +30,10 @@ public class MemberController {
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
     public Page<MemberResponse> findAll(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String username
+            @RequestParam(required = false) String searchValue,
+            @RequestParam(required = false) MemberRole role
             ) {
-        return memberService.findAll(pageable, username);
+        return memberService.findAll(pageable, searchValue, role);
     }
 
     // 내 프로필 조회

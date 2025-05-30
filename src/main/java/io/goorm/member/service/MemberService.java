@@ -5,6 +5,7 @@ import io.goorm.config.exception.CustomException;
 import io.goorm.config.exception.ErrorCode;
 import io.goorm.member.dao.MemberRepository;
 import io.goorm.member.domain.Member;
+import io.goorm.member.domain.MemberRole;
 import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
@@ -35,7 +36,7 @@ public class MemberService {
     }
 
     // 전체 회원 조회
-    public Page<MemberResponse> findAll(Pageable pageable, String username) {
+    public Page<MemberResponse> findAll(Pageable pageable, String searchValue, MemberRole role) {
         List<String> allowedSortProperties = List.of("createdAt", "modifiedAt", "username");
 
         Sort sort = pageable.getSort();
@@ -47,7 +48,7 @@ public class MemberService {
             }
         }
 
-        return memberRepository.findAllByPageableAndFilter(pageable, username)
+        return memberRepository.findAllByPageableAndFilter(pageable, searchValue, role)
                 .map(MemberResponse::from);
     }
 

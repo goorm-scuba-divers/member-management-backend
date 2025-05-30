@@ -7,7 +7,9 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.goorm.member.domain.Member;
+import io.goorm.member.domain.MemberRole;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,14 +27,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Member> findAllByPageableAndFilter(Pageable pageable, String username) {
+    public Page<Member> findAllByPageableAndFilter(Pageable pageable, String searchValue, MemberRole role) {
 
        JPAQuery<Member> query = queryFactory
                 .select(member)
                 .from(member)
                 .where(
-                        usernameContains(username),
-                        member.deletedAt.isNull()
+                        searchValueContains(searchValue),
+                        member.deletedAt.isNull(),
+                        roleEquals(role)
                 )
                .offset(pageable.getOffset())
                .limit(pageable.getPageSize());
@@ -59,10 +62,23 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return new PageImpl<>(content, pageable, total);
     }
 
-    private BooleanExpression usernameContains(String username) {
-        if (username == null || username.isEmpty()) {
-            return null; // No filter applied
+    private BooleanExpression searchValueContains(String searchValue) {
+
+        if (searchValue == null || searchValue.isEmpty()) {
+            return null;
         }
-        return member.username.contains(username);
+
+        BooleanExpression searchExpression = member.username.containsIgnoreCase(searchValue);
+
+        if (StringUtils.isNumeric(searchValue)) {
+            searchExpression = searchExpression
+                    .or(member.id.eq(Long.valueOf(searchValue)));
+        }
+
+        return searchExpression;
+    }
+
+    private BooleanExpression roleEquals(MemberRole role) {
+        return role != null ? member.role.eq(role) : null;
     }
 }
