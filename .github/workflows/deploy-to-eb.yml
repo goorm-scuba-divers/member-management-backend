@@ -41,15 +41,19 @@ jobs:
       run: |
         aws s3 cp app.zip s3://elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663/app.zip
 
+    - name: Set VERSION_LABEL env
+      run: echo "VERSION_LABEL=${GITHUB_SHA}-$(date +%s)" >> $GITHUB_ENV
+
+
     - name: Create new EB app version
       run: |
         aws elasticbeanstalk create-application-version \
           --application-name ${{ secrets.EB_APP_NAME }} \
-          --version-label ${{ github.sha }} \
+          --version-label ${{ env.VERSION_LABEL }} \
           --source-bundle S3Bucket="elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663",S3Key="app.zip"
 
     - name: Update EB environment
       run: |
         aws elasticbeanstalk update-environment \
           --environment-name ${{ secrets.EB_ENV_NAME }} \
-          --version-label ${{ github.sha }}
+          --version-label ${{ env.VERSION_LABEL }}
