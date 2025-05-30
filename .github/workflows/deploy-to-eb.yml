@@ -1,0 +1,38 @@
+name: Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Build JAR file
+      run: |
+        ./gradlew clean build
+        mv build/libs/*.jar app.jar
+
+    - name: Deploy to Elastic Beanstalk
+      run: |
+        zip -r app.zip app.jar
+        aws elasticbeanstalk create-application-version \
+          --application-name ${{ secrets.EB_APP_NAME }} \
+          --version-label ${{ github.sha }} \
+          --source-bundle S3Bucket="elasticbeanstalk-${{ secrets.AWS_REGION }}-your-bucket",S3Key="app.zip"
+        
+        aws elasticbeanstalk update-environment \
+          --environment-name ${{ secrets.EB_ENV_NAME }} \
+          --version-label ${{ github.sha }}
