@@ -3,13 +3,13 @@ package io.goorm.auth.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record AuthSignInResponse (
-        @Schema(description = "액세스 토큰")
-        String accessToken,
+        @Schema(description = "토큰 정보")
+        AuthTokenInfo tokens,
 
-        @Schema(description = "리프레시 토큰")
-        String refreshToken
+        @Schema(description = "회원 정보")
+        AuthMemberInfo member
 ) {
-    public static AuthSignInResponse of(String accessToken, String refreshToken) {
-        return new AuthSignInResponse(accessToken, refreshToken);
+    public static AuthSignInResponse of(AuthTokenInfo tokenInfo, AuthMemberInfo memberInfo) {
+        return new AuthSignInResponse(tokenInfo, memberInfo);
     }
 }
