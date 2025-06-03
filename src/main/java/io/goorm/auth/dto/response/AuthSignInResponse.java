@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record AuthSignInResponse (
         @Schema(description = "토큰 정보")
-        AuthTokenInfo tokens,
+        AuthTokenResponse tokens,
 
         @Schema(description = "회원 정보")
-        AuthMemberInfo member
+        AuthMemberResponse member
 ) {
-    public static AuthSignInResponse of(AuthTokenInfo tokenInfo, AuthMemberInfo memberInfo) {
+    public static AuthSignInResponse of(AuthTokenResponse tokenInfo, AuthMemberResponse memberInfo) {
         return new AuthSignInResponse(tokenInfo, memberInfo);
     }
 }

@@ -3,7 +3,7 @@ package io.goorm.auth.dto.response;
 import io.goorm.member.domain.MemberRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record AuthMemberInfo (
+public record AuthMemberResponse(
         @Schema(description = "고유 아이디")
         Long id,
 
@@ -16,7 +16,7 @@ public record AuthMemberInfo (
         @Schema(description = "권한")
         MemberRole role
 ) {
-    public static AuthMemberInfo of(Long id, String username, String nickname, MemberRole role) {
-        return new AuthMemberInfo(id, username, nickname, role);
+    public static AuthMemberResponse of(Long id, String username, String nickname, MemberRole role) {
+        return new AuthMemberResponse(id, username, nickname, role);
     }
 }
