@@ -2,9 +2,9 @@ package io.goorm.auth.service;
 
 import io.goorm.auth.dao.RefreshTokenRepository;
 import io.goorm.auth.domain.RefreshToken;
-import io.goorm.auth.dto.response.AuthMemberInfo;
+import io.goorm.auth.dto.response.AuthMemberResponse;
 import io.goorm.auth.dto.response.AuthSignInResponse;
-import io.goorm.auth.dto.response.AuthTokenInfo;
+import io.goorm.auth.dto.response.AuthTokenResponse;
 import io.goorm.config.dto.TokenDto;
 import io.goorm.config.exception.CustomException;
 import io.goorm.config.exception.ErrorCode;
@@ -64,7 +64,7 @@ public class AuthService {
         Member member = new Member(request.username(), request.nickname(), encodedPassword);
         memberRepository.save(member);
 
-        AuthMemberInfo memberInfo = AuthMemberInfo.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
+        AuthMemberResponse memberInfo = AuthMemberResponse.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
 
         return AuthSignInResponse.of(generateTokens(member.getId(), member.getRole()), memberInfo);
     }
@@ -74,7 +74,7 @@ public class AuthService {
      * @param refreshToken
      * @return
      */
-    public AuthSignInResponse refresh(String refreshToken) {
+    public AuthTokenResponse refresh(String refreshToken) {
         TokenDto token = jwtUtil.parseToken(refreshToken);
         if (token == null) throw new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED);
 
@@ -85,7 +85,7 @@ public class AuthService {
 
         Member member = findRefreshToken.getMember();
 
-        return regenerateTokens(member);
+        return regenerateTokens(member).tokens();
     }
 
     /**
@@ -95,7 +95,7 @@ public class AuthService {
      * @return
      */
     private AuthSignInResponse regenerateTokens(Member member) {
-        AuthTokenInfo tokens = generateTokens(member.getId(), member.getRole());
+        AuthTokenResponse tokens = generateTokens(member.getId(), member.getRole());
         Date expiredAt = jwtUtil.getExpiredAtByToken(tokens.refreshToken());
 
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByMember(member);
@@ -106,7 +106,7 @@ public class AuthService {
             refreshToken.get().rotate(tokens.refreshToken(), expiredAt);
         }
 
-        AuthMemberInfo memberInfo = AuthMemberInfo.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
+        AuthMemberResponse memberInfo = AuthMemberResponse.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
 
         return AuthSignInResponse.of(tokens, memberInfo);
     }
@@ -117,11 +117,11 @@ public class AuthService {
      * @param role
      * @return
      */
-    private AuthTokenInfo generateTokens(Long memberId, MemberRole role) {
+    private AuthTokenResponse generateTokens(Long memberId, MemberRole role) {
         String accessToken = jwtUtil.generateAccessToken(memberId, role);
         String refreshToken = jwtUtil.generateRefreshToken(memberId, role);
 
-        return AuthTokenInfo.of(accessToken, refreshToken);
+        return AuthTokenResponse.of(accessToken, refreshToken);
     }
 
     /**

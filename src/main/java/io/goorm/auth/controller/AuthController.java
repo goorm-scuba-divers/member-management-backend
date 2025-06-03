@@ -4,6 +4,7 @@ import io.goorm.auth.dto.request.AuthRefreshTokenReIssueRequest;
 import io.goorm.auth.dto.request.AuthSignInRequest;
 import io.goorm.auth.dto.request.AuthSignOutRequest;
 import io.goorm.auth.dto.response.AuthSignInResponse;
+import io.goorm.auth.dto.response.AuthTokenResponse;
 import io.goorm.auth.service.AuthService;
 import io.goorm.member.dto.request.MemberSaveRequest;
 import io.goorm.member.service.MemberService;
@@ -40,7 +41,7 @@ public class AuthController {
     @PostMapping("/auth/reissue")
     @Operation(summary = "리프레쉬 토큰 재발급", description = "리프레쉬 토큰 재발급 API")
     @ApiResponse(responseCode = "200", description = "리프레쉬 토큰 재발급 성공")
-    public AuthSignInResponse reissue(@Valid @RequestBody AuthRefreshTokenReIssueRequest request) {
+    public AuthTokenResponse reissue(@Valid @RequestBody AuthRefreshTokenReIssueRequest request) {
         return authService.refresh(request.refreshToken());
     }
 
