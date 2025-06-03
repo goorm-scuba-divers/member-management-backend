@@ -16,7 +16,7 @@ public record AuthMemberInfo (
         @Schema(description = "권한")
         MemberRole role
 ) {
-    public static AuthMemberInfo from(Long id, String username, String nickname, MemberRole role) {
+    public static AuthMemberInfo of(Long id, String username, String nickname, MemberRole role) {
         return new AuthMemberInfo(id, username, nickname, role);
     }
 }

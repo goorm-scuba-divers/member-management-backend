@@ -64,7 +64,7 @@ public class AuthService {
         Member member = new Member(request.username(), request.nickname(), encodedPassword);
         memberRepository.save(member);
 
-        AuthMemberInfo memberInfo = AuthMemberInfo.from(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
+        AuthMemberInfo memberInfo = AuthMemberInfo.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
 
         return AuthSignInResponse.of(generateTokens(member.getId(), member.getRole()), memberInfo);
     }
@@ -106,7 +106,7 @@ public class AuthService {
             refreshToken.get().rotate(tokens.refreshToken(), expiredAt);
         }
 
-        AuthMemberInfo memberInfo = AuthMemberInfo.from(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
+        AuthMemberInfo memberInfo = AuthMemberInfo.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
 
         return AuthSignInResponse.of(tokens, memberInfo);
     }
