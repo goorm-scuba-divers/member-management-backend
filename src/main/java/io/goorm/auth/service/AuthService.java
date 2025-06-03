@@ -115,7 +115,11 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(memberId, role);
         String refreshToken = jwtUtil.generateRefreshToken(memberId, role);
 
-        return AuthSignInResponse.of(accessToken, refreshToken);
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED)
+        );
+
+        return AuthSignInResponse.of(accessToken, refreshToken, memberId, member.getUsername(), member.getNickname(), role);
     }
 
     /**
