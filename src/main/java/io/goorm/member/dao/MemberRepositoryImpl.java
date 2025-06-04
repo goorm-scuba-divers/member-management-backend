@@ -52,6 +52,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         }
 
         List<Member> content = query.fetch();
+
+        // TODO: PageableExecutionUtils.getPage()
         long total = Optional.ofNullable(
                 queryFactory
                         .select(member.count())

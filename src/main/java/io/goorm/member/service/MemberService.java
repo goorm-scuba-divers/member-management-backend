@@ -37,17 +37,6 @@ public class MemberService {
 
     // 전체 회원 조회
     public Page<MemberResponse> findAll(Pageable pageable, String searchValue, MemberRole role) {
-        List<String> allowedSortProperties = List.of("createdAt", "modifiedAt", "username");
-
-        Sort sort = pageable.getSort();
-
-        for (Sort.Order order : sort) {
-            String property = order.getProperty();
-            if (!allowedSortProperties.contains(property)) {
-                throw new CustomException(ErrorCode.MEMBER_SORT_INVALID);
-            }
-        }
-
         return memberRepository.findAllByPageableAndFilter(pageable, searchValue, role)
                 .map(MemberResponse::from);
     }

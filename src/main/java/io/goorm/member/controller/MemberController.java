@@ -2,6 +2,7 @@ package io.goorm.member.controller;
 
 import io.goorm.config.dto.PrincipalDetails;
 import io.goorm.member.domain.MemberRole;
+import io.goorm.member.domain.SortBy;
 import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
@@ -11,9 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +30,17 @@ public class MemberController {
     // 리스트 조회
     @GetMapping()
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<MemberResponse> findAll(
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String searchValue,
-            @RequestParam(required = false) MemberRole role
+            @RequestParam(required = false) MemberRole role,
+            @RequestParam(required = false, defaultValue = "CREATED_AT") SortBy sortBy,
+            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortDirection,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
             ) {
-        return memberService.findAll(pageable, searchValue, role);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy.getValue()));
+        return memberService.findAll(pageable, searchValue.trim(), role);
     }
 
     // 내 프로필 조회
