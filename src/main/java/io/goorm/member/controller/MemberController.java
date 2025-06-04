@@ -10,13 +10,11 @@ import io.goorm.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +30,7 @@ public class MemberController {
     // 리스트 조회
     @GetMapping()
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<MemberResponse> findAll(
             @RequestParam(required = false) String searchValue,
             @RequestParam(required = false) MemberRole role,
@@ -52,7 +51,6 @@ public class MemberController {
     }
 
     // 수정
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     @Operation(summary = "내 프로필 수정", description = "내 프로필 수정 API")
     public void updateMember(@AuthenticationPrincipal PrincipalDetails userDetails,
