@@ -69,8 +69,8 @@ public class AuthController {
     @Operation(summary = "로그아웃", description = "로그아웃 API")
     @ApiResponse(responseCode = "200", description = "로그아웃 성공")
     public void signOut(@Valid @RequestBody AuthSignOutRequest request) {
-        cookieUtil.deleteTokenCookies();
         authService.signOut(request.refreshToken());
+        cookieUtil.deleteTokenCookies();
     }
 
 }

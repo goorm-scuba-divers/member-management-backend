@@ -1,5 +1,6 @@
 package io.goorm.member.controller;
 
+import io.goorm.config.cookie.CookieUtil;
 import io.goorm.config.dto.PrincipalDetails;
 import io.goorm.member.domain.MemberRole;
 import io.goorm.member.dto.request.MemberUpdateRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final CookieUtil cookieUtil;
 
     // 리스트 조회
     @GetMapping()
@@ -56,5 +58,6 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 API")
     public void deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
         memberService.deleteMember(userDetails);
+        cookieUtil.deleteTokenCookies();
     }
 }
