@@ -12,9 +12,9 @@ import io.goorm.member.domain.Member;
 import io.goorm.member.domain.MemberRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -92,6 +92,7 @@ public class JwtUtil {
      * @param refreshToken
      * @return
      */
+    @Transactional
     public AuthTokenResponse refresh(String refreshToken) {
         TokenDto token = parseToken(refreshToken);
         if (token == null) throw new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED);
