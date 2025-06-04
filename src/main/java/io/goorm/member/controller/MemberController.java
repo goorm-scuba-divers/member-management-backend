@@ -15,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,8 +59,10 @@ public class MemberController {
     // 삭제
     @DeleteMapping
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 API")
-    public void deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+    public ResponseEntity<Void> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
         memberService.deleteMember(userDetails);
-        cookieUtil.deleteTokenCookies();
+        HttpHeaders tokenHeaders = cookieUtil.deleteTokenCookies();
+
+        return ResponseEntity.status(HttpStatus.OK).headers(tokenHeaders).body(null);
     }
 }

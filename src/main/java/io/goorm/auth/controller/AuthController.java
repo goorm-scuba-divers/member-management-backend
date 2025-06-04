@@ -68,9 +68,11 @@ public class AuthController {
     @PostMapping("/auth/sign-out")
     @Operation(summary = "로그아웃", description = "로그아웃 API")
     @ApiResponse(responseCode = "200", description = "로그아웃 성공")
-    public void signOut(@Valid @RequestBody AuthSignOutRequest request) {
+    public ResponseEntity<Void> signOut(@Valid @RequestBody AuthSignOutRequest request) {
         authService.signOut(request.refreshToken());
-        cookieUtil.deleteTokenCookies();
+        HttpHeaders tokenHeaders = cookieUtil.deleteTokenCookies();
+
+        return ResponseEntity.status(HttpStatus.OK).headers(tokenHeaders).body(null);
     }
 
 }
