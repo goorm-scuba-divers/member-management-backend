@@ -1,5 +1,6 @@
 package io.goorm.member.controller;
 
+import io.goorm.config.cookie.CookieUtil;
 import io.goorm.config.dto.PrincipalDetails;
 import io.goorm.member.domain.MemberRole;
 import io.goorm.member.domain.SortBy;
@@ -16,6 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final CookieUtil cookieUtil;
 
     // 리스트 조회
     @GetMapping()
@@ -61,7 +67,10 @@ public class MemberController {
     // 삭제
     @DeleteMapping
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 API")
-    public void deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+    public ResponseEntity<Void> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
         memberService.deleteMember(userDetails);
+        HttpHeaders tokenHeaders = cookieUtil.deleteTokenCookies();
+
+        return ResponseEntity.status(HttpStatus.OK).headers(tokenHeaders).body(null);
     }
 }
