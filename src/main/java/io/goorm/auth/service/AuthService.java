@@ -47,7 +47,7 @@ public class AuthService {
          if (!passwordEncoder.matches(password, member.getPassword()))
              throw new CustomException(ErrorCode.AUTH_USERNAME_PASSWORD_INVALID);
 
-         return regenerateTokens(member);
+         return jwtUtil.regenerateTokens(member);
      }
 
      /**
@@ -66,63 +66,10 @@ public class AuthService {
 
         AuthMemberResponse memberInfo = AuthMemberResponse.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
 
-        return AuthSignInResponse.of(generateTokens(member.getId(), member.getRole()), memberInfo);
+        return AuthSignInResponse.of(jwtUtil.generateTokens(member.getId(), member.getRole()), memberInfo);
     }
 
-    /**
-     * 리프레쉬 토큰 재발급
-     * @param refreshToken
-     * @return
-     */
-    public AuthTokenResponse refresh(String refreshToken) {
-        TokenDto token = jwtUtil.parseToken(refreshToken);
-        if (token == null) throw new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED);
 
-        // 만료되지 않은 리프레쉬 토큰을 DB에서 찾기
-        RefreshToken findRefreshToken = refreshTokenRepository
-                .findByValueAndExpiredAtIsAfter(refreshToken, LocalDateTime.now())
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED));
-
-        Member member = findRefreshToken.getMember();
-
-        return regenerateTokens(member).tokens();
-    }
-
-    /**
-     * 새로운 토큰으로 교체
-     * 리프레쉬 토큰은 검증을 위해 DB에 저장
-     * @param member
-     * @return
-     */
-    private AuthSignInResponse regenerateTokens(Member member) {
-        AuthTokenResponse tokens = generateTokens(member.getId(), member.getRole());
-        Date expiredAt = jwtUtil.getExpiredAtByToken(tokens.refreshToken());
-
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByMember(member);
-
-        if (refreshToken.isEmpty()) {
-            refreshTokenRepository.save(RefreshToken.createRefreshToken(tokens.refreshToken(), member, expiredAt));
-        } else {
-            refreshToken.get().rotate(tokens.refreshToken(), expiredAt);
-        }
-
-        AuthMemberResponse memberInfo = AuthMemberResponse.of(member.getId(), member.getUsername(), member.getNickname(), member.getRole());
-
-        return AuthSignInResponse.of(tokens, memberInfo);
-    }
-
-    /**
-     * 새로운 토큰 생성
-     * @param memberId
-     * @param role
-     * @return
-     */
-    private AuthTokenResponse generateTokens(Long memberId, MemberRole role) {
-        String accessToken = jwtUtil.generateAccessToken(memberId, role);
-        String refreshToken = jwtUtil.generateRefreshToken(memberId, role);
-
-        return AuthTokenResponse.of(accessToken, refreshToken);
-    }
 
     /**
      * 로그아웃
@@ -137,6 +84,16 @@ public class AuthService {
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED));
 
         refreshTokenRepository.delete(findRefreshToken);
+    }
+
+    /**
+     * 토큰 재발급
+     * @param refreshToken
+     * @return
+     */
+
+    public AuthTokenResponse refresh(String refreshToken) {
+        return jwtUtil.refresh(refreshToken);
     }
 
 }

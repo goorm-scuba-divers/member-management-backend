@@ -7,13 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import static io.goorm.config.cookie.CookieConstants.*;
 
 @Component
 @RequiredArgsConstructor
 public class CookieUtil {
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
-    private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+
 
     public HttpHeaders generateTokenCookies(String accessToken, String refreshToken) {
 
