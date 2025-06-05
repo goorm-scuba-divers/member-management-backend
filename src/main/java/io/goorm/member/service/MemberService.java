@@ -9,6 +9,7 @@ import io.goorm.member.domain.MemberRole;
 import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
+import io.goorm.member.dto.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,9 +37,8 @@ public class MemberService {
     }
 
     // 전체 회원 조회
-    public Page<MemberResponse> findAll(Pageable pageable, String searchValue, MemberRole role) {
-        return memberRepository.findAllByPageableAndFilter(pageable, searchValue, role)
-                .map(MemberResponse::from);
+    public PageResponse<MemberResponse> findAll(Pageable pageable, String searchValue, MemberRole role) {
+        return PageResponse.from(memberRepository.findAllByPageableAndFilter(pageable, searchValue, role).map(MemberResponse::from));
     }
 
     // 내 정보 수정
