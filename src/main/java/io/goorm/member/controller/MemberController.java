@@ -46,7 +46,7 @@ public class MemberController {
             @RequestParam(required = false, defaultValue = "10") int size
             ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy.getValue()));
-        return memberService.findAll(pageable, searchValue.trim(), role);
+        return memberService.findAll(pageable, searchValue != null ? searchValue.trim() : null, role);
     }
 
     // 내 프로필 조회

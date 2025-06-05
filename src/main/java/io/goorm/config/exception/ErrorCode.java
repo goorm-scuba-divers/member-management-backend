@@ -14,7 +14,7 @@ public enum ErrorCode {
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 
     // 멤버
-    MEMBER_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 회원입니다."),
+    MEMBER_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 회원입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
     MEMBER_SORT_INVALID(HttpStatus.BAD_REQUEST, "정렬 기준이 잘못되었습니다."),
     MEMBER_PASSWORD_SAME_AS_PREVIOUS(HttpStatus.BAD_REQUEST, "이전 비밀번호와 같습니다."),
