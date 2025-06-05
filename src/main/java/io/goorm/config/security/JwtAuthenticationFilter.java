@@ -1,7 +1,7 @@
 package io.goorm.config.security;
 
 import io.goorm.auth.dto.response.AuthTokenResponse;
-import io.goorm.auth.service.AuthService;
+import io.goorm.auth.service.TokenService;
 import io.goorm.config.cookie.CookieUtil;
 import io.goorm.config.dto.PrincipalDetails;
 import io.goorm.config.dto.TokenDto;
@@ -11,7 +11,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +30,7 @@ import static io.goorm.config.cookie.CookieConstants.*;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
+    private final TokenService tokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (refreshTokenByCookie != null) {
-            AuthTokenResponse authTokenResponse = jwtUtil.refresh(refreshTokenByCookie);
+            AuthTokenResponse authTokenResponse = tokenService.refresh(refreshTokenByCookie);
 
             HttpHeaders httpHeaders = cookieUtil.generateTokenCookies(authTokenResponse.accessToken(), authTokenResponse.refreshToken());
 
