@@ -11,7 +11,6 @@ import io.goorm.config.exception.ErrorCode;
 import io.goorm.config.security.JwtUtil;
 import io.goorm.member.dao.MemberRepository;
 import io.goorm.member.domain.Member;
-import io.goorm.member.domain.MemberRole;
 import io.goorm.member.dto.request.MemberSaveRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Optional;
 
 @Slf4j
 @Transactional
@@ -33,6 +30,7 @@ public class AuthService {
      private final RefreshTokenRepository refreshTokenRepository;
      private final JwtUtil jwtUtil;
      private final PasswordEncoder passwordEncoder;
+     private final TokenService tokenService;
 
      /**
       * 로그인
@@ -47,7 +45,7 @@ public class AuthService {
          if (!passwordEncoder.matches(password, member.getPassword()))
              throw new CustomException(ErrorCode.AUTH_USERNAME_PASSWORD_INVALID);
 
-         return jwtUtil.regenerateTokens(member);
+         return regenerateTokens(member);
      }
 
      /**
@@ -87,13 +85,23 @@ public class AuthService {
     }
 
     /**
-     * 토큰 재발급
-     * @param refreshToken
+     * 새로운 토큰으로 교체
+     * 리프레쉬 토큰은 검증을 위해 DB에 저장
+     * @param member
      * @return
      */
+    public AuthSignInResponse regenerateTokens(Member member) {
+        AuthTokenResponse tokens = tokenService.regenerateAndStoreTokens(member);
 
-    public AuthTokenResponse refresh(String refreshToken) {
-        return jwtUtil.refresh(refreshToken);
+        AuthMemberResponse memberInfo = AuthMemberResponse.of(
+                member.getId(),
+                member.getUsername(),
+                member.getNickname(),
+                member.getRole()
+        );
+
+        return AuthSignInResponse.of(tokens, memberInfo);
     }
+
 
 }

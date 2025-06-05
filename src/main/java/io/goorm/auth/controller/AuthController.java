@@ -7,6 +7,7 @@ import io.goorm.auth.dto.response.AuthMemberResponse;
 import io.goorm.auth.dto.response.AuthSignInResponse;
 import io.goorm.auth.dto.response.AuthTokenResponse;
 import io.goorm.auth.service.AuthService;
+import io.goorm.auth.service.TokenService;
 import io.goorm.config.cookie.CookieUtil;
 import io.goorm.member.dto.request.MemberSaveRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final CookieUtil cookieUtil;
+    private final TokenService tokenService;
 
     @PostMapping("/auth/sign-up")
     @Operation(summary = "회원가입", description = "회원가입 API")
@@ -60,7 +62,7 @@ public class AuthController {
     @Operation(summary = "리프레쉬 토큰 재발급", description = "리프레쉬 토큰 재발급 API")
     @ApiResponse(responseCode = "200", description = "리프레쉬 토큰 재발급 성공")
     public AuthTokenResponse reissue(@Valid @RequestBody AuthRefreshTokenReIssueRequest request) {
-        return authService.refresh(request.refreshToken());
+        return tokenService.refresh(request.refreshToken());
     }
 
     //로그아웃

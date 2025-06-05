@@ -7,6 +7,7 @@ import io.goorm.member.domain.SortBy;
 import io.goorm.member.dto.request.MemberUpdateRequest;
 import io.goorm.member.dto.response.MemberFindMeResponse;
 import io.goorm.member.dto.response.MemberResponse;
+import io.goorm.member.dto.response.PageResponse;
 import io.goorm.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +38,7 @@ public class MemberController {
     @GetMapping()
     @Operation(summary = "회원 리스트 조회", description = "회원 리스트 조회 API")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MemberResponse> findAll(
+    public PageResponse<MemberResponse> findAll(
             @RequestParam(required = false) String searchValue,
             @RequestParam(required = false) MemberRole role,
             @RequestParam(required = false, defaultValue = "CREATED_AT") SortBy sortBy,

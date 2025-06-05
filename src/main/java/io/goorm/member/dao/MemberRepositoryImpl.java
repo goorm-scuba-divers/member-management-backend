@@ -8,16 +8,21 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.goorm.member.domain.Member;
 import io.goorm.member.domain.MemberRole;
+import io.goorm.member.dto.response.PageResponse;
+import io.micrometer.observation.Observation;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 import static io.goorm.member.domain.QMember.member;
 
@@ -53,15 +58,11 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
         List<Member> content = query.fetch();
 
-        // TODO: PageableExecutionUtils.getPage()
-        long total = Optional.ofNullable(
-                queryFactory
-                        .select(member.count())
-                        .from(member)
-                        .fetchOne()
-        ).orElse(0L);
+        JPAQuery<Long> count = queryFactory
+                .select(member.count())
+                .from(member);
 
-        return new PageImpl<>(content, pageable, total);
+        return PageableExecutionUtils.getPage(content, pageable, count::fetchOne);
     }
 
     private BooleanExpression searchValueContains(String searchValue) {
