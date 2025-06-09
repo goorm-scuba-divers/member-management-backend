@@ -9,6 +9,8 @@ import io.goorm.auth.dto.response.AuthTokenResponse;
 import io.goorm.auth.service.AuthService;
 import io.goorm.auth.service.TokenService;
 import io.goorm.config.cookie.CookieUtil;
+import io.goorm.config.exception.CustomException;
+import io.goorm.config.exception.ErrorCode;
 import io.goorm.member.dto.request.MemberSaveRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,8 +64,19 @@ public class AuthController {
     @PostMapping("/auth/reissue")
     @Operation(summary = "리프레쉬 토큰 재발급", description = "리프레쉬 토큰 재발급 API")
     @ApiResponse(responseCode = "200", description = "리프레쉬 토큰 재발급 성공")
-    public AuthTokenResponse reissue(@Valid @RequestBody AuthRefreshTokenReIssueRequest request) {
-        return tokenService.refresh(request.refreshToken());
+    public ResponseEntity<Void> reissue(@CookieValue(name = "refresh_token", required = false) String cookieRefreshToken) {
+        if (cookieRefreshToken == null) {
+            throw new CustomException(ErrorCode.AUTH_REFRESH_TOKEN_MISSING_REQUEST);
+        }
+
+        AuthTokenResponse response = tokenService.refresh(cookieRefreshToken);
+
+        String accessToken = response.accessToken();
+        String refreshToken = response.refreshToken();
+
+        HttpHeaders tokenHeaders = cookieUtil.generateTokenCookies(accessToken, refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(tokenHeaders).body(null);
     }
 
     //로그아웃
