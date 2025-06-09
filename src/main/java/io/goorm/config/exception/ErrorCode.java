@@ -12,6 +12,7 @@ public enum ErrorCode {
     AUTH_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     AUTH_USERNAME_PASSWORD_INVALID(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 잘못되었습니다."),
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+    AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "잘못된 접근 입니다."),
 
     // 멤버
     MEMBER_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 회원입니다."),
