@@ -12,16 +12,13 @@ import io.goorm.member.dto.response.MemberResponse;
 import io.goorm.member.dto.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -43,25 +40,24 @@ public class MemberService {
 
     // 내 정보 수정
     public void updateMember(PrincipalDetails userDetails, MemberUpdateRequest request) {
-        Member currentMember = getCurrentMember(userDetails);
+        Member member = null;
 
-        if (!request.nickname().equals(currentMember.getNickname())) {
-            currentMember.updateNickname(request.nickname());
+        // 닉네임 수정
+        if (StringUtils.hasText(request.nickname())) {
+            member = getCurrentMember(userDetails);
+
+            if (!request.nickname().equals(member.getNickname()))
+                member.updateNickname(request.nickname());
         }
 
-        if (request.currentPassword() != null) {
-            boolean matches = passwordEncoder.matches(request.currentPassword(), currentMember.getPassword());
-            boolean isSameAsNewPassword = passwordEncoder.matches(request.newPassword(), currentMember.getPassword());
+        // 비밀번호 수정
+        if (StringUtils.hasText(request.currentPassword()) && StringUtils.hasText(request.newPassword())) {
+            if (member == null) member = getCurrentMember(userDetails);
 
-            if (matches && isSameAsNewPassword) {
-                throw new CustomException(ErrorCode.MEMBER_PASSWORD_SAME_AS_PREVIOUS);
-            }
-
-            if (matches) {
-                currentMember.updatePassword(passwordEncoder.encode(request.newPassword()));
-            } else {
+            if (!passwordEncoder.matches(request.currentPassword(), member.getPassword()))
                 throw new CustomException(ErrorCode.MEMBER_PASSWORD_INVALID);
-            }
+
+            member.updatePassword(passwordEncoder.encode(request.newPassword()));
         }
     }
 
