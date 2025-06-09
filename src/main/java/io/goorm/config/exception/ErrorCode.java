@@ -7,11 +7,14 @@ public enum ErrorCode {
     // 공통
     COMMON_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
     COMMON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    COMMON_COOKIE_MISSING_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 쿠키 요청 입니다."),
 
     // 인증
     AUTH_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     AUTH_USERNAME_PASSWORD_INVALID(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 잘못되었습니다."),
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+    AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "잘못된 접근 입니다."),
+    AUTH_REFRESH_TOKEN_MISSING_REQUEST(HttpStatus.BAD_REQUEST, "리프레쉬 토큰이 쿠키에 포함되어 있지 않습니다."),
 
     // 멤버
     MEMBER_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 회원입니다."),
