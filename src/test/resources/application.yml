@@ -7,3 +7,6 @@ spring:
 
 jwt:
   secretKey: 12234555
+
+server:
+  environment: ${ENVIRONMENT:local}

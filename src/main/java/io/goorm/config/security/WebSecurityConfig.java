@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                 authorize ->
                         authorize
                                 .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/health/**").permitAll()
                                 .requestMatchers("/swagger-resources/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated()
         );
