@@ -10,50 +10,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '21' # 또는 17 등 사용 중인 JDK 버전에 맞게
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21' # 또는 17 등 사용 중인 JDK 버전에 맞게
 
-    - name: Build Spring Boot JAR
-      run: ./gradlew bootJar
+      - name: Build Spring Boot JAR
+        run: ./gradlew bootJar
 
-    - name: Rename JAR to app.jar
-      run: |
-        JAR_NAME=$(ls build/libs/*.jar | grep -v 'plain' | head -n 1)
-        mv "$JAR_NAME" app.jar
+      - name: Rename JAR to app.jar
+        run: |
+          JAR_NAME=$(ls build/libs/*.jar | grep -v 'plain' | head -n 1)
+          mv "$JAR_NAME" app.jar
 
-    - name: Zip the JAR
-      run: zip -r app.zip app.jar
+      - name: Zip the JAR
+        run: zip -r app.zip app.jar
 
-    - name: Upload to S3
-      run: |
-        aws s3 cp app.zip s3://elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663/app.zip
+      - name: Upload to S3
+        run: |
+          aws s3 cp app.zip s3://elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663/app.zip
 
-    - name: Set VERSION_LABEL env
-      run: echo "VERSION_LABEL=${GITHUB_SHA}-$(date +%s)" >> $GITHUB_ENV
+      - name: Set VERSION_LABEL env
+        run: echo "VERSION_LABEL=${GITHUB_SHA}-$(date +%s)" >> $GITHUB_ENV
 
 
-    - name: Create new EB app version
-      run: |
-        aws elasticbeanstalk create-application-version \
-          --application-name ${{ secrets.EB_APP_NAME }} \
-          --version-label ${{ env.VERSION_LABEL }} \
-          --source-bundle S3Bucket="elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663",S3Key="app.zip"
+      - name: Create new EB app version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name ${{ secrets.EB_APP_NAME }} \
+            --version-label ${{ env.VERSION_LABEL }} \
+            --source-bundle S3Bucket="elasticbeanstalk-${{ secrets.AWS_REGION }}-341354504663",S3Key="app.zip"
 
-    - name: Update EB environment
-      run: |
-        aws elasticbeanstalk update-environment \
-          --environment-name ${{ secrets.EB_ENV_NAME }} \
-          --version-label ${{ env.VERSION_LABEL }}
+      - name: Update EB environment
+        run: |
+          aws elasticbeanstalk update-environment \
+            --environment-name ${{ secrets.EB_ENV_NAME }} \
+            --version-label ${{ env.VERSION_LABEL }}

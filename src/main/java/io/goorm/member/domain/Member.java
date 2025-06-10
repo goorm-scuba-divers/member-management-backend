@@ -31,6 +31,17 @@ public class Member extends BaseTimeEntity {
         this.role = MemberRole.USER;
     }
 
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                '}';
+    }
+
     public String getNickname() {
         return nickname;
     }

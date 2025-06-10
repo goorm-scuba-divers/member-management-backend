@@ -45,4 +45,8 @@ public class RefreshToken extends BaseTimeEntity {
         return this.member;
     }
 
+    public String getValue() {
+        return this.value;
+    }
+
 }
