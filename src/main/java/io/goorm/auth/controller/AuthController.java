@@ -83,8 +83,12 @@ public class AuthController {
     @PostMapping("/auth/sign-out")
     @Operation(summary = "로그아웃", description = "로그아웃 API")
     @ApiResponse(responseCode = "200", description = "로그아웃 성공")
-    public ResponseEntity<Void> signOut(@Valid @RequestBody AuthSignOutRequest request) {
-        authService.signOut(request.refreshToken());
+    public ResponseEntity<Void> signOut(@CookieValue(name = "refresh_token", required = false) String cookieRefreshToken) {
+        if (cookieRefreshToken == null) {
+            throw new CustomException(ErrorCode.AUTH_REFRESH_TOKEN_MISSING_REQUEST);
+        }
+
+        authService.signOut(cookieRefreshToken);
         HttpHeaders tokenHeaders = cookieUtil.deleteTokenCookies();
 
         return ResponseEntity.status(HttpStatus.OK).headers(tokenHeaders).body(null);
