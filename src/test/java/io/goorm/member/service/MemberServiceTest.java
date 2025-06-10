@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
@@ -31,8 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
+
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
