@@ -6,7 +6,7 @@ spring:
     password:
 
 jwt:
-  secretKey: 12234555
+  secretKey: 12234555327189378921738912738921739821738921738972138917238972183927189372198372189
 
 server:
   environment: ${ENVIRONMENT:local}
