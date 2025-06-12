@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Transactional
@@ -75,13 +76,14 @@ public class AuthService {
      */
     public void signOut(String refreshToken) {
         TokenDto token = jwtUtil.parseToken(refreshToken);
-        if (token == null) throw new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED);
+        if (token == null) return;
 
-        RefreshToken findRefreshToken = refreshTokenRepository
-                .findByValueAndExpiredAtIsAfter(refreshToken, LocalDateTime.now())
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_TOKEN_EXPIRED));
+        Optional<RefreshToken> findRefreshToken = refreshTokenRepository
+                .findByValueAndExpiredAtIsAfter(refreshToken, LocalDateTime.now());
 
-        refreshTokenRepository.delete(findRefreshToken);
+        if(findRefreshToken.isEmpty()) return;
+
+        refreshTokenRepository.delete(findRefreshToken.get());
     }
 
     /**
